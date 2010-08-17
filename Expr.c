@@ -37,7 +37,7 @@ int EvaluateExpressions(const char *buffer, int buf_length, int is_filename)
 
 	/*Is it a file or memory*/
 	if (is_filename)
-		input_stream = antlr3AsciiFileStreamNew(pANTLR3_UINT8(buffer));
+		input_stream = antlr3AsciiFileStreamNew( (pANTLR3_UINT8)buffer);
 	else
 		input_stream = antlr3NewAsciiStringCopyStream ( (pANTLR3_UINT8)buffer, (ANTLR3_UINT32) buf_length, NULL);
 	if (input_stream==NULL)
@@ -99,28 +99,6 @@ number_t GetIdentifierValue(char *Id)
 		return s->value;
 	else
 		return 0;
-}
-
-number_t ParseBinaryNumber(char *string)
-{
-	number_t result=0;
-	int i,j;
-	/*skip "0b"*/
-	string+=2;
-	for(j=0, i=strlen(string)-1;i>=0;i--,j++)
-	{
-		int number = string[i] - '0';
-		result += (number<<j);
-	}
-	return result;
-}
-
-void SetOptions(char *option, int value)
-{
-	if( strcmp(option, "PRINT")==0 )
-		print_format = value;
-	else
-		printf("Unknow set option %s\n",  option);
 }
 
 number_t DoArithematicOperation(number_t number1, number_t number2, char *op)
@@ -208,31 +186,3 @@ number_t DoUniaryOperation(number_t number1, char *op)
 	}
 }
 
-/*! Test case for reading input from a file and also from a memory*/
-#ifdef TEST
-int ANTLR3_CDECL main(int argc, char *argv[])
-{
-	char file[]="./input";
-	char expression[]="1+1+(3*3)";
-	InitEva();
-	EvaluateExpressions(file, strlen(file), 1);
-	EvaluateExpressions(expression, strlen(expression), 0);
-}
-void PrintResult(number_t number)
-{
-	
-	if( print_format & 1)
-			printf("%ld\n", number);
-	if( print_format & 2)
-			printf("%#lx\n", number);
-	if( print_format & 4)
-	{
-		int i;
-		printf("0b");
-		for(i=(sizeof(number)*8)-1;i>=0;i--)
-			printf("%1d", (number>>i) & 1 );
-
-		printf("\n");
-	}
-}
-#endif

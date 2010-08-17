@@ -1,0 +1,5 @@
+;; vbc bvcjhbexport CFLAGS=-mno-cygwin
+export CPPFLAGS=-mno-cygwin
+export CXXFLAGS=-mno-cygwin
+export LDFLAGS="-mno-cygwin -mwindows"
+./configure -disable-shared --with-msw
