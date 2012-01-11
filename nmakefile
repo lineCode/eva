@@ -1,27 +1,33 @@
+#To compile you need visual studio 10 express
+#start nmake -f nmakefile from visual studio 10 command prompt
+
 PROGRAM = eva.exe
 
-INCLUDEDIRS = /I . /I C:\libantlr3c-3.2\include /I "C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Include"
-LIBDIRS= /LIBPATH:"C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Lib" /LIBPATH:"C:\libantlr3c-3.2\Release"
+INCLUDEDIRS = /I . /I antlr\libantlr3c-3.2\include
+LIBDIRS = /LIBPATH:"antlr"
 
-CPPSOURCES = EvaLexer.c EvaParser.c EvaTree.c Expr.c Util.c WinGui.cpp
+ANTLR_GEN_SRC = EvaLexer.c EvaParser.c EvaTree.c
+ANTLR_GEN_HEADERS = EvaLexer.h EvaParser.h EvaTree.h
+
+CPPSOURCES = $(ANTLR_GEN_SRC) Expr.c Util.c WinGui.cpp
 CPPOBJECTS = EvaLexer.obj EvaParser.obj EvaTree.obj Expr.obj Util.obj WinGui.obj
 CPPFLAGS = $(INCLUDEDIRS) /nologo /O2 /FD /EHsc 
 CFLAGS = $(CPPFLAGS) 
-JAVAFLAGS = -classpath:"C:\Programs\cygwin\usr\class\antlr-3.2.jar" org.antlr.Tool
+JAVAFLAGS = -classpath "antlr/antlr-3.4.jar" org.antlr.Tool
 
 $(PROGRAM): $(CPPOBJECTS)
-	link.exe /out:$@ $(CPPOBJECTS) $(LIBDIRS) libantlr3c-3.2.lib gdi32.lib User32.lib kernel32.lib 
+	link.exe /NODEFAULTLIB:libcmt /out:$@ $(CPPOBJECTS) $(LIBDIRS) antlr3cd.lib gdi32.lib User32.lib kernel32.lib 
 
 EvaLexer.c: Eva.g
 	java $(JAVAFLAGS) Eva.g
 EvaParser.c: Eva.g
 	java $(JAVAFLAGS) Eva.g
 EvaTree.c: EvaTree.g
-	 java $(JAVAFLAGS) EvaTree.g
+	java $(JAVAFLAGS) EvaTree.g
 	
 EvaLexer.obj: EvaLexer.c
 EvaParser.obj: EvaParser.c
 EvaTree.obj: EvaTree.c
 
 clean:
-	del $(CPPOBJECTS) $(PROGRAM) *.tlh
+	del $(ANTLR_GEN_SRC) $(ANTLR_GEN_HEADERS) $(CPPOBJECTS) $(PROGRAM) *.tlh *.idb *.exp *.lib *.tokens
