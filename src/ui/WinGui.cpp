@@ -2,7 +2,7 @@
 #include <windows.h>
 #include <Windowsx.h>
 #include <stdio.h>
-#include "Expr.h"
+#include <Expr.h>
 
 #define ID_TEXTBOX	100
 
