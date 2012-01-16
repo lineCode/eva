@@ -18,8 +18,10 @@ int InitEva()
 {
 	/*Create symbol table for handling variables*/
 	symtab = antlr3HashTableNew(1);
-	if (symtab == NULL)
+	if (symtab == NULL) {
 		return 1;
+	}
+	
 	return 0;
 }
 
@@ -36,36 +38,48 @@ int EvaluateExpressions(const char *buffer, int buf_length, int is_filename)
 	pANTLR3_COMMON_TREE_NODE_STREAM	nodes;
 
 	/*Is it a file or memory*/
-	if (is_filename)
+	if (is_filename) {
 		input_stream = antlr3AsciiFileStreamNew( (pANTLR3_UINT8)buffer);
-	else
+	} else {
 		input_stream = antlr3NewAsciiStringCopyStream ( (pANTLR3_UINT8)buffer, (ANTLR3_UINT32) buf_length, NULL);
-	if (input_stream==NULL)
-		return 1;
+	}
+	
+	if (input_stream == NULL) {
+		return -1;
+	}
+	
 	/*Invoke lexer and tokenzie*/
 	lxr	= EvaLexerNew(input_stream);
-	if (lxr==NULL)
-		return 2;
+	if (lxr == NULL) {
+		return -1;
+	}
+		
 	token_stream = antlr3CommonTokenStreamSourceNew(ANTLR3_SIZE_HINT, TOKENSOURCE(lxr));
-	if ( token_stream == NULL )
-		return 3;
+	if (token_stream == NULL) {
+		return -1;
+	}
+	
 	/*Parse the expression*/
 	psr	= EvaParserNew(token_stream);
-	if ( psr == NULL )
-		return 4;
-	if (psr->pParser->rec->state->errorCount > 0)
-		return 5;
+	if (psr == NULL) {
+		return -1;
+	}
+	if (psr->pParser->rec->state->errorCount > 0) {
+		return -1;
+	}
 	
 	/*create ast from the parser*/
 	eva_ast = psr->program(psr);
 	nodes = antlr3CommonTreeNodeStreamNewTree(eva_ast.tree, ANTLR3_SIZE_HINT);
-	if ( nodes == NULL )
-		return 7;
+	if (nodes == NULL) {
+		return -1;
+	}
 		
 	/*Walk the tree and evaluate the expression*/
 	treeParser = EvaTreeNew(nodes);
-	if ( treeParser == NULL )
-		return 8;
+	if (treeParser == NULL)	{
+		return -1;
+	}
 	treeParser->program(treeParser);
 
 	/*cleanup*/
@@ -80,11 +94,11 @@ int EvaluateExpressions(const char *buffer, int buf_length, int is_filename)
 void AssignValueToIdentifier(char *Id, number_t value)
 {
 	symbol_value_t *s;
+	
 	s = (symbol_value_t *)symtab->get(symtab, (void *)Id);
-	if( s )
+	if (s) {
 		s->value = value;
-	else
-	{
+	} else {
 		s = (symbol_value_t *)malloc(sizeof(symbol_value_t));
 		s->value = value;
 		symtab->put(symtab, Id, s, NULL);
@@ -94,16 +108,18 @@ void AssignValueToIdentifier(char *Id, number_t value)
 number_t GetIdentifierValue(char *Id)
 {
 	symbol_value_t *s;
+	
 	s = (symbol_value_t *)symtab->get(symtab, (void *)Id);
-	if( s )
+	if (s) {
 		return s->value;
-	else
+	} else {
 		return 0;
+	}
 }
 
 number_t DoArithematicOperation(number_t number1, number_t number2, char *op)
 {
-	switch( op[0] )
+	switch (op[0])
 	{
 		case '+':
 			return number1 + number2;
@@ -116,44 +132,50 @@ number_t DoArithematicOperation(number_t number1, number_t number2, char *op)
 		case '%':
 			return number1 % number2;
 	}
+	
+	return -1;
 }
 
 number_t DoShiftOperation(number_t number1, number_t number2, char *op)
 {
-	switch( op[0] )
+	switch (op[0])
 	{
 		case '<':
 			return number1<<number2;
 		case '>':
 			return number1>>number2;
 	}
+	
+	return -1;
 }
 
 number_t DoComparisionOperation(number_t number1, number_t number2, char *op)
 {
-	switch( op[0] )
+	switch (op[0])
 	{
 		case '<':
-			if ( op[1] == '=' )
-				return number1<=number2;
+			if (op[1] == '=')
+				return number1 <= number2;
 			else
 				return number1<number2;
 		case '>':
-			if ( op[1] == '=' )
-				return number1>=number2;
+			if(op[1] == '=')
+				return number1 >= number2;
 			else
 				return number1>number2;
 		case '=':
-			if ( op[1] == '=' )
-				return number1==number2;
+			if (op[1] == '=')
+				return number1 == number2;
 			else
-				return number1!=number2;
+				return number1 != number2;
 	}
+	
+	return -1;
 }
 
 number_t DoBitwiseOperation(number_t number1, number_t number2, char *op)
 {
-	switch( op[0] )
+	switch (op[0])
 	{
 		case '&':
 			return number1 & number2;
@@ -163,6 +185,7 @@ number_t DoBitwiseOperation(number_t number1, number_t number2, char *op)
 			return number1 ^ number2;
 	}
 	
+	return -1;
 }
 
 number_t DoUniaryOperation(number_t number1, char *op)
@@ -174,15 +197,16 @@ number_t DoUniaryOperation(number_t number1, char *op)
 		case '~':
 			return ~number1;
 		case '+':
-			if ( op[1]=='+' )
+			if (op[1] == '+')
 				return number1+1;
 			else
 				return number1;
 		case '-':
-			if ( op[1]=='-' )
+			if (op[1] == '-')
 				return number1-1;
 			else
-				return -number1;	
+				return -number1;
 	}
+	
+	return -1;
 }
-

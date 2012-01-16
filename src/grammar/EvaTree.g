@@ -17,7 +17,7 @@ program
 		;
 
 statement	
-		:	bitwise_expression						{PrintResult($bitwise_expression.result);}
+		:	bitwise_expression						{StoreResult($bitwise_expression.result);}
 		|	^('=' ID bitwise_expression)					{AssignValueToIdentifier((char *)$ID.text->chars, $bitwise_expression.result);}
 		;
 

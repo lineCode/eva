@@ -10,8 +10,11 @@ typedef unsigned long number_t;
 #undef NULL
 #define NULL (0)
 
+extern number_t ExprResult;
+void StoreResult(number_t number);
+
 int InitEva();
-void PrintResult(number_t number);
+
 void AssignValueToIdentifier(char *Id, number_t value);
 int EvaluateExpressions(const char *buffer, int buf_length, int is_filename);
 number_t GetIdentifierValue(char *Id);
@@ -24,7 +27,6 @@ number_t DoComparisionOperation(number_t number1, number_t number2, char *op);
 number_t DoBitwiseOperation(number_t number1, number_t number2, char *op);
 number_t DoUniaryOperation(number_t number1, char *op);
 char * ConvertNumberToString(number_t number);
-
 
 #ifdef __cplusplus
     }
