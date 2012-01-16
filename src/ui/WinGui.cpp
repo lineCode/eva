@@ -92,6 +92,20 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg,  WPARAM wParam, LPARAM lParam
 			ShowWindow(hText, SW_SHOWNORMAL);
 			UpdateWindow(hText);
 			break;
+		case WM_CTLCOLORSTATIC:
+		case WM_CTLCOLOREDIT:
+		{
+			HDC hdc = (HDC)wParam;
+			HWND hwnd = (HWND)lParam;
+			COLORREF crFg = RGB(255,255,255);	//White for foreground
+			COLORREF crBk = RGB(0,0,0);			//Black for background
+			
+			SetBkColor(hdc, crBk);
+			SetTextColor(hdc, crFg);
+			SetDCBrushColor(hdc, crBk);
+			
+			return (LRESULT) GetStockObject(DC_BRUSH);
+		}
 		case WM_SIZING:
 		case WM_SIZE:
 			/*Handle resize*/
@@ -121,7 +135,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	WndClsEx.cbWndExtra    = 0;
 	WndClsEx.hIcon         = LoadIcon(NULL, IDI_APPLICATION);
 	WndClsEx.hCursor       = LoadCursor(NULL, IDC_ARROW);
-	WndClsEx.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
+	WndClsEx.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
 	WndClsEx.lpszMenuName  = NULL;
 	WndClsEx.lpszClassName = ClsName;
 	WndClsEx.hInstance     = hInstance;
