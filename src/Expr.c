@@ -141,9 +141,9 @@ number_t DoShiftOperation(number_t number1, number_t number2, char *op)
 	switch (op[0])
 	{
 		case '<':
-			return number1<<number2;
+			return number1 << number2;
 		case '>':
-			return number1>>number2;
+			return number1 >> number2;
 	}
 	
 	return -1;
@@ -157,12 +157,12 @@ number_t DoComparisionOperation(number_t number1, number_t number2, char *op)
 			if (op[1] == '=')
 				return number1 <= number2;
 			else
-				return number1<number2;
+				return number1 < number2;
 		case '>':
 			if(op[1] == '=')
 				return number1 >= number2;
 			else
-				return number1>number2;
+				return number1 > number2;
 		case '=':
 			if (op[1] == '=')
 				return number1 == number2;
@@ -198,12 +198,12 @@ number_t DoUniaryOperation(number_t number1, char *op)
 			return ~number1;
 		case '+':
 			if (op[1] == '+')
-				return number1+1;
+				return number1 + 1;
 			else
 				return number1;
 		case '-':
 			if (op[1] == '-')
-				return number1-1;
+				return number1 - 1;
 			else
 				return -number1;
 	}

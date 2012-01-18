@@ -1,0 +1,1 @@
+#define IDI_CALC_ICON 201

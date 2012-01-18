@@ -1,8 +1,8 @@
-
 #include <windows.h>
 #include <Windowsx.h>
 #include <stdio.h>
 #include <Expr.h>
+#include "resource.h"
 
 #define ID_TEXTBOX	100
 
@@ -128,18 +128,20 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	WNDCLASSEX	WndClsEx;
 	HWND		hDlg;
 
-	WndClsEx.cbSize        = sizeof(WNDCLASSEX);
-	WndClsEx.style         = CS_HREDRAW | CS_VREDRAW;
-	WndClsEx.lpfnWndProc   = WndProcedure;
-	WndClsEx.cbClsExtra    = 0;
-	WndClsEx.cbWndExtra    = 0;
-	WndClsEx.hIcon         = LoadIcon(NULL, IDI_APPLICATION);
-	WndClsEx.hCursor       = LoadCursor(NULL, IDC_ARROW);
-	WndClsEx.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
-	WndClsEx.lpszMenuName  = NULL;
-	WndClsEx.lpszClassName = ClsName;
-	WndClsEx.hInstance     = hInstance;
-	WndClsEx.hIconSm       = LoadIcon(NULL, IDI_APPLICATION);
+	WndClsEx.cbSize			= sizeof(WNDCLASSEX);
+	WndClsEx.style			= CS_HREDRAW | CS_VREDRAW;
+	WndClsEx.lpfnWndProc	= WndProcedure;
+	WndClsEx.cbClsExtra		= 0;
+	WndClsEx.cbWndExtra		= 0;
+	WndClsEx.hCursor		= LoadCursor(NULL, IDC_ARROW);
+	WndClsEx.hbrBackground	= (HBRUSH)GetStockObject(BLACK_BRUSH);
+	WndClsEx.lpszMenuName	= NULL;
+	WndClsEx.lpszClassName	= ClsName;
+	WndClsEx.hInstance		= hInstance;
+	//WndClsEx.hIconSm		= LoadIcon(NULL, IDI_APPLICATION);
+	//WndClsEx.hIcon			= LoadIcon(NULL, IDI_APPLICATION);
+	WndClsEx.hIcon			= LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_CALC_ICON));
+    WndClsEx.hIconSm		= (HICON)LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_CALC_ICON), IMAGE_ICON, 16, 16, 0);
 
 	RegisterClassEx(&WndClsEx);
 	
