@@ -4,8 +4,6 @@
 #include <Expr.h>
 #include "resource.h"
 
-#define ID_TEXTBOX	100
-
 WNDPROC wpOrigEditProc;
 
 static void AppendText(HWND hText, char *buffer)
@@ -20,11 +18,14 @@ static void AppendText(HWND hText, char *buffer)
 
 static void PrintResult(HWND hText, number_t number)
 {
-	char * buf = ConvertNumberToString(number);
-	if (buf == NULL)
+	char * buf;
+
+	buf = ConvertNumberToString(number);
+	if (buf == NULL) {
 		return;
+	}
 	
-	AppendText(hText, "\r\n");
+	AppendText(hText, "\r\n=");
 	AppendText(hText, buf);
 	free(buf);
 }
@@ -138,8 +139,6 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	WndClsEx.lpszMenuName	= NULL;
 	WndClsEx.lpszClassName	= ClsName;
 	WndClsEx.hInstance		= hInstance;
-	//WndClsEx.hIconSm		= LoadIcon(NULL, IDI_APPLICATION);
-	//WndClsEx.hIcon			= LoadIcon(NULL, IDI_APPLICATION);
 	WndClsEx.hIcon			= LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_CALC_ICON));
     WndClsEx.hIconSm		= (HICON)LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_CALC_ICON), IMAGE_ICON, 16, 16, 0);
 
@@ -155,8 +154,8 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	InitEva();
 	
 	/*Create new window for us*/
-	hDlg = CreateWindow(ClsName, WndName, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT,
-						CW_USEDEFAULT, CW_USEDEFAULT,  CW_USEDEFAULT, NULL, NULL,
+	hDlg = CreateWindow(ClsName, WndName, WS_OVERLAPPEDWINDOW,
+						CW_USEDEFAULT, CW_USEDEFAULT, 400, 400, NULL, NULL,
 						hInstance, NULL);
 	ShowWindow(hDlg, SW_SHOWNORMAL);
 	UpdateWindow(hDlg);
