@@ -5,6 +5,7 @@
 #include "resource.h"
 
 WNDPROC wpOrigEditProc;
+#define MAX_RESULT_BUFFER	512
 
 static void AppendText(HWND hText, char *buffer)
 {
@@ -18,16 +19,33 @@ static void AppendText(HWND hText, char *buffer)
 
 static void PrintResult(HWND hText, number_t number)
 {
-	char * buf;
-
-	buf = ConvertNumberToString(number);
-	if (buf == NULL) {
-		return;
+	char buf[MAX_RESULT_BUFFER];
+	unsigned long print_format;
+	
+	print_format = GetIdentifierValueAsNativeInteger("print_format");
+	if ((print_format & PRINT_FORMAT_BIN) || (print_format & PRINT_FORMAT_DEC)) {
+		integer_t *integer_result;
+		char *str_result;
+		
+		integer_result = AllocateAndInitInteger();
+		mpz_set_f(*integer_result, number);
+		if (print_format & PRINT_FORMAT_BIN) {
+			str_result = mpz_get_str(NULL, 2, *integer_result);
+			AppendText(hText, "\r\n=");
+			AppendText(hText, str_result);
+			free(str_result);
+		}
+		if (print_format & PRINT_FORMAT_HEX) {
+			str_result = mpz_get_str(NULL, 16, *integer_result);
+			AppendText(hText, "\r\n=");
+			AppendText(hText, str_result);
+			free(str_result);
+		}
+		FreeInteger(integer_result);
 	}
 	
-	AppendText(hText, "\r\n=");
+	gmp_snprintf(buf, sizeof(buf), "\r\n=%Ff", number);
 	AppendText(hText, buf);
-	free(buf);
 }
 
 static void ProcessTextChange(HWND hText)
@@ -59,7 +77,7 @@ static void ProcessTextChange(HWND hText)
 	/*Finally evaluate the expression*/
 	EvaluateExpressions((char *)buffer, line_length, 0);
 	/*Print the number in user specified format*/
-	PrintResult(hText, ExprResult);
+	PrintResult(hText, *fExpressionResult);
 	
 	/*cleanup*/
 	free(buffer);
