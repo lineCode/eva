@@ -13,13 +13,13 @@ LINK_FLAG = /nologo /NODEFAULTLIB:libcmt /out:$@ /LIBPATH:"$(ANTLR_BIN_DIR)"
 ANTLR_GEN_SRC = EvaLexer.c EvaParser.c EvaTree.c
 ANTLR_GEN_HEADERS = EvaLexer.h EvaParser.h EvaTree.h
 
-OBJECT_FILES = EvaLexer.obj EvaParser.obj EvaTree.obj Expr.obj Util.obj WinGui.obj resource.rc.res
+OBJECT_FILES = EvaLexer.obj EvaParser.obj EvaTree.obj Expr.obj WinGui.obj resource.rc.res
 CPPFLAGS = $(INCLUDE_DIRS) /nologo /O2 /FD /EHsc /c
 CFLAGS = $(CPPFLAGS) 
 JAVAFLAGS = -classpath "$(ANTLR_BIN_DIR)/antlr-3.4.jar" org.antlr.Tool
 
 $(PROGRAM): $(OBJECT_FILES)
-	link.exe $** $(LINK_FLAG) antlr3cd.lib gdi32.lib User32.lib kernel32.lib 
+	link.exe $** $(LINK_FLAG) mpir.lib antlr3cd.lib gdi32.lib User32.lib kernel32.lib 
 
 EvaLexer.c: $(GRAMMAR_DIR)/Eva.g
 	java $(JAVAFLAGS) $**
