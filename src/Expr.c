@@ -24,6 +24,7 @@ int InitEva()
 	}
 	
 	fExpressionResult = AllocateAndInitNumber();
+	mpf_set_d(*fExpressionResult, 0);
 	
 	return 0;
 }
@@ -150,71 +151,76 @@ void FreeInteger(integer_t *i)
 		FreeInteger(integer_result);								\
 	}
 
-	
+#define FREE(x) if(x) {x->free(x);}
+
+#define ABORT_IF(cond)												\
+	if (cond) {														\
+		error = __LINE__;											\
+		goto clean_up;												\
+	}
+
+ANTLR3_BOOLEAN RecoverFromMismatchedElement(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_BITSET_LIST followBits);
+void DisplayRecognitionError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 * tokenNames);
+
 /*! Read expressions from file or memory and Evaluate 
 */
 int EvaluateExpressions(const char *buffer, int buf_length, int is_filename)
 {
-	pANTLR3_INPUT_STREAM input_stream;
-	pEvaLexer lxr;
-	pANTLR3_COMMON_TOKEN_STREAM token_stream;
-	pEvaParser psr;
+	pANTLR3_INPUT_STREAM input_stream = NULL;
+	pEvaLexer lxr = NULL;
+	pANTLR3_COMMON_TOKEN_STREAM token_stream = NULL;
+	pEvaParser psr = NULL;
+	pEvaTree treeParser = NULL;
+	pANTLR3_COMMON_TREE_NODE_STREAM	nodes = NULL;
 	EvaParser_program_return eva_ast;
-	pEvaTree treeParser;
-	pANTLR3_COMMON_TREE_NODE_STREAM	nodes;
-
+	int error = 0;
+	
+	ResetErrorString();
+	
 	/*Is it a file or memory*/
 	if (is_filename) {
-		input_stream = antlr3AsciiFileStreamNew( (pANTLR3_UINT8)buffer);
+		input_stream = antlr3AsciiFileStreamNew((pANTLR3_UINT8)buffer);
 	} else {
-		input_stream = antlr3NewAsciiStringCopyStream ( (pANTLR3_UINT8)buffer, (ANTLR3_UINT32) buf_length, NULL);
+		input_stream = antlr3NewAsciiStringCopyStream((pANTLR3_UINT8)buffer, (ANTLR3_UINT32)buf_length, NULL);
 	}
-	
-	if (input_stream == NULL) {
-		return -1;
-	}
+	ABORT_IF(input_stream == NULL);
 	
 	/*Invoke lexer and tokenzie*/
 	lxr	= EvaLexerNew(input_stream);
-	if (lxr == NULL) {
-		return -1;
-	}
-		
+	ABORT_IF(lxr == NULL);
 	token_stream = antlr3CommonTokenStreamSourceNew(ANTLR3_SIZE_HINT, TOKENSOURCE(lxr));
-	if (token_stream == NULL) {
-		return -1;
-	}
-	
+	ABORT_IF(token_stream == NULL);
+
 	/*Parse the expression*/
 	psr	= EvaParserNew(token_stream);
-	if (psr == NULL) {
-		return -1;
-	}
-	if (psr->pParser->rec->state->errorCount > 0) {
-		return -1;
-	}
+	ABORT_IF(psr == NULL);
+	//psr->pParser->rec->recoverFromMismatchedElement = recoverFromMismatchedElement;
+	psr->pParser->rec->displayRecognitionError = DisplayRecognitionError;
 	
 	/*create ast from the parser*/
 	eva_ast = psr->program(psr);
+	/*check if there is parsing error*/
+	ABORT_IF(psr->pParser->rec->state->errorCount > 0);
+	
 	nodes = antlr3CommonTreeNodeStreamNewTree(eva_ast.tree, ANTLR3_SIZE_HINT);
-	if (nodes == NULL) {
-		return -1;
-	}
+	ABORT_IF(nodes == NULL);
 		
 	/*Walk the tree and evaluate the expression*/
 	treeParser = EvaTreeNew(nodes);
-	if (treeParser == NULL)	{
-		return -1;
-	}
+	ABORT_IF(treeParser == NULL);
+	/*Take action*/
 	treeParser->program(treeParser);
 
-	/*cleanup*/
-    psr->free(psr);
-    token_stream->free(token_stream);
-    lxr->free(lxr);
-    input_stream->close(input_stream);
-
-	return 0;
+	/*All done lets cleanup*/
+clean_up:
+	FREE(treeParser);
+	FREE(nodes);
+	FREE(psr);
+	FREE(token_stream);
+	FREE(lxr);
+	FREE(input_stream);
+	
+	return error;
 }
 
 void AssignValueToIdentifier(char *Id, number_t value)

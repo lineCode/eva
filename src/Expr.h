@@ -48,6 +48,10 @@ void DoBitwiseOperation(number_t result, number_t number1, number_t number2, cha
 void DoUniaryOperation(number_t result, number_t number1, char *op);
 char * ConvertNumberToString(number_t number);
 
+/*Error Handling functions*/
+char *GetLastErrorString();
+void ResetErrorString();
+
 #ifdef __cplusplus
     }
 #endif

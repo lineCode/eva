@@ -31,13 +31,13 @@ static void PrintResult(HWND hText, number_t number)
 		mpz_set_f(*integer_result, number);
 		if (print_format & PRINT_FORMAT_BIN) {
 			str_result = mpz_get_str(NULL, 2, *integer_result);
-			AppendText(hText, "\r\n=");
+			AppendText(hText, "\r\n=0b");
 			AppendText(hText, str_result);
 			free(str_result);
 		}
 		if (print_format & PRINT_FORMAT_HEX) {
 			str_result = mpz_get_str(NULL, 16, *integer_result);
-			AppendText(hText, "\r\n=");
+			AppendText(hText, "\r\n=0x");
 			AppendText(hText, str_result);
 			free(str_result);
 		}
@@ -53,6 +53,7 @@ static void ProcessTextChange(HWND hText)
 	long char_index, line_index, line_length;
 	TCHAR *buffer;
 	long buffer_size;
+	int error;
 
 	/*Find where the last edit was done character index, line*/
 	char_index = SendMessage(hText, EM_LINEINDEX , -1, 0);
@@ -75,9 +76,17 @@ static void ProcessTextChange(HWND hText)
 	buffer[line_length] = 0;
 	
 	/*Finally evaluate the expression*/
-	EvaluateExpressions((char *)buffer, line_length, 0);
-	/*Print the number in user specified format*/
-	PrintResult(hText, *fExpressionResult);
+	error = EvaluateExpressions((char *)buffer, line_length, 0);
+	if (error == 0) {
+		/*Print the number in user specified format*/
+		PrintResult(hText, *fExpressionResult);
+	} else {
+		char *error_string;
+
+		error_string = GetLastErrorString();
+		AppendText(hText, "\r\n");
+		AppendText(hText, error_string);
+	}
 	
 	/*cleanup*/
 	free(buffer);
