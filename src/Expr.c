@@ -174,7 +174,7 @@ int EvaluateExpressions(const char *buffer, int buf_length, int is_filename)
 	pANTLR3_COMMON_TREE_NODE_STREAM	nodes = NULL;
 	EvaParser_program_return eva_ast;
 	int error = 0;
-	
+
 	ResetErrorString();
 	
 	/*Is it a file or memory*/
@@ -229,9 +229,11 @@ void AssignValueToIdentifier(char *Id, number_t value)
 	
 	s = (symbol_value_t *)symtab->get(symtab, (void *)Id);
 	if (s) {
+		mpf_init(s->value);
 		mpf_set(s->value, value);
 	} else {
 		s = (symbol_value_t *)malloc(sizeof(symbol_value_t));
+		mpf_init(s->value);
 		mpf_set(s->value, value);
 		symtab->put(symtab, Id, s, NULL);
 	}

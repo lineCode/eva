@@ -63,37 +63,17 @@ DisplayRecognitionError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 * toke
 	pANTLR3_COMMON_TREE	    theCommonTree;
 
 	// Retrieve some info for easy reading.
-	//
 	ex	    =		recognizer->state->exception;
 	ttext   =		NULL;
 
 	// See if there is a 'filename' we can use
-	//
-	if	(ex->streamName == NULL)
-	{
-		if	(((pANTLR3_COMMON_TOKEN)(ex->token))->type == ANTLR3_TOKEN_EOF)
-		{
-			APPEND_TO_ERROR("-end of input-(");
-		}
-		else
-		{
-			APPEND_TO_ERROR("-unknown source-(");
-		}
-	}
-	else
+	if (ex->streamName != NULL && strcmp((const char *)ex->streamName, "-memory-") == 0 )
 	{
 		ftext = ex->streamName->to8(ex->streamName);
-		APPEND_TO_ERROR("%s(", ftext->chars);
+		APPEND_TO_ERROR("%s(%d) : ", ftext->chars, recognizer->state->exception->line);
 	}
 
-	// Next comes the line number
-	//
-
-	APPEND_TO_ERROR("%d) ", recognizer->state->exception->line);
-	APPEND_TO_ERROR(" : error %d : %s", 
-										recognizer->state->exception->type,
-					(pANTLR3_UINT8)	   (recognizer->state->exception->message));
-
+	//APPEND_TO_ERROR("%s", (pANTLR3_UINT8)(recognizer->state->exception->message));
 
 	// How we determine the next piece is dependent on which thing raised the
 	// error.
@@ -110,18 +90,20 @@ DisplayRecognitionError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 * toke
 		theToken    = (pANTLR3_COMMON_TOKEN)(recognizer->state->exception->token);
 		ttext	    = theToken->toString(theToken);
 
-		APPEND_TO_ERROR(", at offset %d", recognizer->state->exception->charPositionInLine);
+		if (recognizer->state->exception->charPositionInLine > 0) {
+			APPEND_TO_ERROR(" pos %d", recognizer->state->exception->charPositionInLine + 2);
+		}
 		if  (theToken != NULL)
 		{
 			if (theToken->type == ANTLR3_TOKEN_EOF)
 			{
-				APPEND_TO_ERROR(", at <EOF>");
+				APPEND_TO_ERROR("<EOF>");
 			}
 			else
 			{
 				// Guard against null text in a token
 				//
-				APPEND_TO_ERROR("\n    near %s\n    ", ttext == NULL ? (pANTLR3_UINT8)"<no text for the token>" : ttext->chars);
+				//APPEND_TO_ERROR("\n    near %s\n    ", ttext == NULL ? (pANTLR3_UINT8)"<no text for the token>" : ttext->chars);
 			}
 		}
 		break;
@@ -142,8 +124,8 @@ DisplayRecognitionError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 * toke
 			{
 				theToken	= (pANTLR3_COMMON_TOKEN)    theBaseTree->getToken(theBaseTree);
 			}
-			APPEND_TO_ERROR(", at offset %d", theBaseTree->getCharPositionInLine(theBaseTree));
-			APPEND_TO_ERROR(", near %s", ttext->chars);
+			APPEND_TO_ERROR(" pos %d", theBaseTree->getCharPositionInLine(theBaseTree));
+			APPEND_TO_ERROR(" near %s", ttext->chars);
 		}
 		break;
 
@@ -188,7 +170,7 @@ DisplayRecognitionError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 * toke
 			}
 			else
 			{
-				APPEND_TO_ERROR(" : Extraneous input - expected %s ...\n", tokenNames[ex->expecting]);
+				APPEND_TO_ERROR(" : Extraneous input - expecting an operator\n");
 			}
 		}
 		break;
@@ -263,7 +245,7 @@ DisplayRecognitionError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 * toke
 		// you should. It means that at the point where the current token occurred
 		// that the DFA indicates nowhere to go from here.
 		//
-		APPEND_TO_ERROR(" : cannot match to any predicted input...\n");
+		APPEND_TO_ERROR(" : expression expected\n");
 
 		break;
 
