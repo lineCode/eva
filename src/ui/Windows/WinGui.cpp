@@ -23,7 +23,7 @@ static void PrintResult(HWND hText, number_t number)
 	unsigned long print_format;
 	
 	print_format = GetIdentifierValueAsNativeInteger("print_format");
-	if ((print_format & PRINT_FORMAT_BIN) || (print_format & PRINT_FORMAT_DEC)) {
+	if ((print_format & PRINT_FORMAT_BIN) || (print_format & PRINT_FORMAT_HEX)) {
 		integer_t *integer_result;
 		char *str_result;
 		
@@ -43,9 +43,10 @@ static void PrintResult(HWND hText, number_t number)
 		}
 		FreeInteger(integer_result);
 	}
-	
-	gmp_snprintf(buf, sizeof(buf), "\r\n=%Ff", number);
-	AppendText(hText, buf);
+	if (print_format & PRINT_FORMAT_DEC) {
+		gmp_snprintf(buf, sizeof(buf), "\r\n=%Ff", number);
+		AppendText(hText, buf);
+	}
 }
 
 static void ProcessTextChange(HWND hText)
@@ -65,7 +66,7 @@ static void ProcessTextChange(HWND hText)
 	
 	/*Allocate buffer*/
 	buffer = (TCHAR *)malloc(buffer_size);
-	((WORD *)buffer)[0] = buffer_size;
+	((WORD *)buffer)[0] = (WORD)buffer_size;
 	/*Get the line*/
 	line_length = SendMessage(hText, EM_GETLINE, line_index, (LPARAM)buffer) + 1;
 	

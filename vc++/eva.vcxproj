@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{908E1748-70F3-4D42-A82D-0569B92C942B}</ProjectGuid>
+    <RootNamespace>eva</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../src;$(SolutionDir)/../external/include/libantlr;$(SolutionDir)/../external/include;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>libcmt;msvcrt</IgnoreSpecificDefaultLibraries>
+      <AdditionalOptions>/LIBPATH:$(SolutionDir)\..\external\lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>mpir.lib;antlr3cd.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\external\include\libantlr\antlr3.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3baserecognizer.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3basetree.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3basetreeadaptor.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3bitset.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3collections.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3commontoken.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3commontree.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3commontreeadaptor.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3commontreenodestream.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3convertutf.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3cyclicdfa.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3debugeventlistener.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3defs.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3encodings.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3errors.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3exception.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3filestream.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3input.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3interfaces.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3intstream.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3lexer.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3memory.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3parser.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3parsetree.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3recognizersharedstate.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3rewritestreams.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3string.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3stringstream.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3tokenstream.h" />
+    <ClInclude Include="..\external\include\libantlr\antlr3treeparser.h" />
+    <ClInclude Include="..\external\include\mpir.h" />
+    <ClInclude Include="..\src\Expr.h" />
+    <ClInclude Include="..\src\ui\Windows\resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\Error.c" />
+    <ClCompile Include="..\src\Expr.c" />
+    <ClCompile Include="..\src\ui\Windows\WinGui.cpp" />
+    <ClCompile Include="EvaLexer.c" />
+    <ClCompile Include="EvaParser.c" />
+    <ClCompile Include="EvaTree.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\src\grammar\Eva.g">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">cd
+java -classpath "$(SolutionDir)/../external/antlr-3.4.jar" org.antlr.Tool -o . %(FullPath)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EvaLexer.c;EvaParser.c;EvaLexer.h;EvaParser.h;Eva.Tokens</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\src\grammar\EvaTree.g">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">java -classpath "$(SolutionDir)/../external/antlr-3.4.jar" org.antlr.Tool -o . %(FullPath)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EvaTree.c;EvaTree.h;EvaTree.Tokens</Outputs>
+    </CustomBuild>
+    <None Include="..\src\ui\Windows\calculator.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\src\ui\Windows\resource.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
