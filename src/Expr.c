@@ -237,6 +237,7 @@ void AssignValueToIdentifier(char *Id, number_t value)
 		mpf_set(s->value, value);
 		symtab->put(symtab, Id, s, NULL);
 	}
+	mpf_set(*fExpressionResult, value);
 }
 
 void AssignValueFromIdentifier(number_t result, char *Id)
@@ -258,7 +259,7 @@ unsigned int GetIdentifierValueAsNativeInteger(char *Id)
 		return mpf_get_ui(s->value);
 	}
 	
-	return -1;
+	return 0;
 }
 
 void DoArithematicOperation(number_t result, number_t number1, number_t number2, char *op)

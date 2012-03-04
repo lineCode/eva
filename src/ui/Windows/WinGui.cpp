@@ -21,8 +21,16 @@ static void PrintResult(HWND hText, number_t number)
 {
 	char buf[MAX_RESULT_BUFFER];
 	unsigned long print_format;
+	unsigned long print_format_float;
 	
 	print_format = GetIdentifierValueAsNativeInteger("print_format");
+	if (print_format == 0) {
+		print_format = PRINT_FORMAT_DEC;
+	}
+	print_format_float = GetIdentifierValueAsNativeInteger("print_format_float");
+	if (print_format_float == 0) {
+		print_format_float = PRINT_FORMAT_FLOAT_AUTO;
+	}
 	if ((print_format & PRINT_FORMAT_BIN) || (print_format & PRINT_FORMAT_HEX)) {
 		integer_t *integer_result;
 		char *str_result;
@@ -44,7 +52,12 @@ static void PrintResult(HWND hText, number_t number)
 		FreeInteger(integer_result);
 	}
 	if (print_format & PRINT_FORMAT_DEC) {
-		gmp_snprintf(buf, sizeof(buf), "\r\n=%Ff", number);
+		char format_str[]="\r\n=%F ";
+		format_str[strlen(format_str)-1] = print_format_float == PRINT_FORMAT_FLOAT_AUTO ? 'G' :
+										   print_format_float == PRINT_FORMAT_FLOAT_FIXED ? 'f' :
+										   print_format_float == PRINT_FORMAT_FLOAT_SCIENTIFIC ? 'e' :
+										   print_format_float == PRINT_FORMAT_FLOAT_HEX ? 'X' : 'g';
+		gmp_snprintf(buf, sizeof(buf), format_str, number);
 		AppendText(hText, buf);
 	}
 }

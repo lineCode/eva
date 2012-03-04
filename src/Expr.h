@@ -24,6 +24,12 @@ typedef enum {
 	PRINT_FORMAT_DEC = 2,
 	PRINT_FORMAT_HEX = 4,
 }print_format_t;
+typedef enum {
+	PRINT_FORMAT_FLOAT_AUTO = 1,
+	PRINT_FORMAT_FLOAT_FIXED = 2,
+	PRINT_FORMAT_FLOAT_SCIENTIFIC = 4,
+	PRINT_FORMAT_FLOAT_HEX = 8,
+}print_format_float_t;
 
 int InitEva();
 
