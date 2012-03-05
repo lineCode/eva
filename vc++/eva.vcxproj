@@ -102,6 +102,7 @@
   <ItemGroup>
     <ClCompile Include="..\src\Error.c" />
     <ClCompile Include="..\src\Expr.c" />
+    <ClCompile Include="..\src\ui\Common.c" />
     <ClCompile Include="..\src\ui\Windows\WinGui.cpp" />
     <ClCompile Include="EvaLexer.c" />
     <ClCompile Include="EvaParser.c" />

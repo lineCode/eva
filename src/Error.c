@@ -24,8 +24,10 @@ void ResetErrorString()
 
 #ifdef _MSC_VER
 #define SPRINTF_SAFE	sprintf_s
+#define NEWLINE			"\r\n"
 #elif __GNUC__
 #define SPRINTF_SAFE	snprintf
+#define NEWLINE			"\n"
 #endif
 
 #define APPEND_TO_ERROR(...)												\
@@ -40,6 +42,27 @@ do {																		\
 		error_string_pos += len ;											\
 	}																		\
 } while(0);
+
+static void
+AppendErrorMarker(int pos)
+{
+	char *error_mark;
+	int i;
+
+	error_mark = (char *) malloc(pos + 1);
+	if (error_mark == NULL) {
+		return;
+	}
+
+	for(i=0; i< pos-1; i++) {
+		error_mark[i] = ' ';
+	}
+	error_mark[pos-1] = '^';
+	error_mark[pos] = 0;
+	APPEND_TO_ERROR("%s"NEWLINE, error_mark);
+	free(error_mark);
+}
+
 
 /*! For now fail on error
 */
@@ -65,6 +88,10 @@ DisplayRecognitionError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 * toke
 	// Retrieve some info for easy reading.
 	ex	    =		recognizer->state->exception;
 	ttext   =		NULL;
+
+	if (recognizer->state->exception->charPositionInLine > 0) {
+		AppendErrorMarker(recognizer->state->exception->charPositionInLine + 2);
+	}
 
 	// See if there is a 'filename' we can use
 	if (ex->streamName != NULL && strcmp((const char *)ex->streamName, "-memory-") == 0 )
@@ -184,17 +211,17 @@ DisplayRecognitionError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 * toke
 		//
 		if	(tokenNames == NULL)
 		{
-			APPEND_TO_ERROR(" : Missing token (%d)...\n", ex->expecting);
+			APPEND_TO_ERROR(" : Missing token (%d)..."NEWLINE, ex->expecting);
 		}
 		else
 		{
 			if	(ex->expecting == ANTLR3_TOKEN_EOF)
 			{
-				APPEND_TO_ERROR(" : Missing <EOF>\n");
+				APPEND_TO_ERROR(" : Missing <EOF>"NEWLINE);
 			}
 			else
 			{
-				APPEND_TO_ERROR(" : Missing %s \n", tokenNames[ex->expecting]);
+				APPEND_TO_ERROR(" : Missing %s "NEWLINE, tokenNames[ex->expecting]);
 			}
 		}
 		break;
@@ -207,7 +234,7 @@ DisplayRecognitionError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 * toke
 		// You may get this if there are not more tokens and more are needed
 		// to complete a parse for instance.
 		//
-		APPEND_TO_ERROR(" : syntax error...\n");    
+		APPEND_TO_ERROR(" : syntax error..."NEWLINE);
 		break;
 
 	case    ANTLR3_MISMATCHED_TOKEN_EXCEPTION:
@@ -223,17 +250,17 @@ DisplayRecognitionError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 * toke
 		//
 		if	(tokenNames == NULL)
 		{
-			APPEND_TO_ERROR(" : syntax error...\n");
+			APPEND_TO_ERROR(" : syntax error..."NEWLINE);
 		}
 		else
 		{
 			if	(ex->expecting == ANTLR3_TOKEN_EOF)
 			{
-				APPEND_TO_ERROR(" : expected <EOF>\n");
+				APPEND_TO_ERROR(" : expected <EOF>"NEWLINE);
 			}
 			else
 			{
-				APPEND_TO_ERROR(" : expected %s ...\n", tokenNames[ex->expecting]);
+				APPEND_TO_ERROR(" : expected %s ..."NEWLINE, tokenNames[ex->expecting]);
 			}
 		}
 		break;
@@ -245,7 +272,7 @@ DisplayRecognitionError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 * toke
 		// you should. It means that at the point where the current token occurred
 		// that the DFA indicates nowhere to go from here.
 		//
-		APPEND_TO_ERROR(" : expression expected\n");
+		APPEND_TO_ERROR(" : expression expected"NEWLINE);
 
 		break;
 
@@ -262,7 +289,7 @@ DisplayRecognitionError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 * toke
 			// possible tokens at this point, but we did not see any
 			// member of that set.
 			//
-			APPEND_TO_ERROR(" : unexpected input...\n  expected one of : ");
+			APPEND_TO_ERROR(" : unexpected input..."NEWLINE"  expected one of : ");
 
 			// What tokens could we have accepted at this point in the
 			// parse?
@@ -289,12 +316,12 @@ DisplayRecognitionError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 * toke
 						count++;
 					}
 				}
-				APPEND_TO_ERROR("\n");
+				APPEND_TO_ERROR(NEWLINE);
 			}
 			else
 			{
-				APPEND_TO_ERROR("Actually dude, we didn't seem to be expecting anything here, or at least\n");
-				APPEND_TO_ERROR("I could not work out what I was expecting, like so many of us these days!\n");
+				APPEND_TO_ERROR("Actually dude, we didn't seem to be expecting anything here, or at least"NEWLINE);
+				APPEND_TO_ERROR("I could not work out what I was expecting, like so many of us these days!"NEWLINE);
 			}
 		}
 		break;
@@ -305,7 +332,7 @@ DisplayRecognitionError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 * toke
 		// but found a token that ended that sequence earlier than
 		// we should have done.
 		//
-		APPEND_TO_ERROR(" : missing elements...\n");
+		APPEND_TO_ERROR(" : missing elements..."NEWLINE);
 		break;
 
 	default:
@@ -315,7 +342,7 @@ DisplayRecognitionError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 * toke
 		// then we are just going to report what we know about the
 		// token.
 		//
-		APPEND_TO_ERROR(" : syntax not recognized...\n");
+		APPEND_TO_ERROR(" : syntax not recognized..."NEWLINE);
 		break;
 	}
 

@@ -58,6 +58,11 @@ char * ConvertNumberToString(number_t number);
 char *GetLastErrorString();
 void ResetErrorString();
 
+/*Command History related functions*/
+void AddToExperssionHistory(char *expression_string);
+char *GetExpressionFromPrevLocation();
+char *GetExpressionFromNextLocation();
+
 #ifdef __cplusplus
     }
 #endif

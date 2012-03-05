@@ -6,15 +6,30 @@
 
 WNDPROC wpOrigEditProc;
 #define MAX_RESULT_BUFFER	512
+#define NEWLINE				"\r\n"
+
+static void ReplaceCurrentLine(HWND hText, char *buffer)
+{
+	long char_index, line_index, line_length;
+	
+	/*Find where the last edit was done character index, line*/
+	char_index = SendMessage(hText, EM_LINEINDEX , -1, 0);
+	line_index = SendMessage(hText, EM_LINEFROMCHAR, -1, 0);
+	/*Find line length*/
+	line_length = SendMessage(hText, EM_LINELENGTH, char_index, 0);
+
+	SendMessage(hText, EM_SETSEL, (WPARAM)char_index, (LPARAM)char_index + line_length);
+	SendMessage(hText, EM_REPLACESEL, 0, (LPARAM)((LPSTR)buffer));
+}
 
 static void AppendText(HWND hText, char *buffer)
 {
 	int ndx;
 	
 	ndx = GetWindowTextLength(hText);
-	SetFocus(hText);
+	//SetFocus(hText);
 	SendMessage(hText, EM_SETSEL, (WPARAM)ndx, (LPARAM)ndx);
-	SendMessage(hText, EM_REPLACESEL, 0, (LPARAM)((LPSTR) buffer));
+	SendMessage(hText, EM_REPLACESEL, 0, (LPARAM)((LPSTR)buffer));
 }
 
 static void PrintResult(HWND hText, number_t number)
@@ -39,20 +54,20 @@ static void PrintResult(HWND hText, number_t number)
 		mpz_set_f(*integer_result, number);
 		if (print_format & PRINT_FORMAT_BIN) {
 			str_result = mpz_get_str(NULL, 2, *integer_result);
-			AppendText(hText, "\r\n=0b");
+			AppendText(hText, NEWLINE"=0b");
 			AppendText(hText, str_result);
 			free(str_result);
 		}
 		if (print_format & PRINT_FORMAT_HEX) {
 			str_result = mpz_get_str(NULL, 16, *integer_result);
-			AppendText(hText, "\r\n=0x");
+			AppendText(hText, NEWLINE"=0x");
 			AppendText(hText, str_result);
 			free(str_result);
 		}
 		FreeInteger(integer_result);
 	}
 	if (print_format & PRINT_FORMAT_DEC) {
-		char format_str[]="\r\n=%F ";
+		char format_str[] = NEWLINE"=%F ";
 		format_str[strlen(format_str)-1] = print_format_float == PRINT_FORMAT_FLOAT_AUTO ? 'G' :
 										   print_format_float == PRINT_FORMAT_FLOAT_FIXED ? 'f' :
 										   print_format_float == PRINT_FORMAT_FLOAT_SCIENTIFIC ? 'e' :
@@ -62,18 +77,43 @@ static void PrintResult(HWND hText, number_t number)
 	}
 }
 
+static void EvaluateExpressionAndPrintResult(HWND hText, char *buffer)
+{
+	int error;
+	long line_length;
+
+	line_length = strlen(buffer);
+	error = EvaluateExpressions((char *)buffer, line_length, 0);
+	if (error == 0) {
+		/*Print the number in user specified format*/
+		PrintResult(hText, *fExpressionResult);
+	} else {
+		char *error_string;
+
+		error_string = GetLastErrorString();
+		AppendText(hText, NEWLINE);
+		AppendText(hText, error_string);
+	}
+
+	AddToExperssionHistory(buffer);
+}
+
 static void ProcessTextChange(HWND hText)
 {
 	long char_index, line_index, line_length;
 	TCHAR *buffer;
 	long buffer_size;
-	int error;
 
 	/*Find where the last edit was done character index, line*/
 	char_index = SendMessage(hText, EM_LINEINDEX , -1, 0);
 	line_index = SendMessage(hText, EM_LINEFROMCHAR, -1, 0);
 	/*Find line length*/
-	line_length = SendMessage( hText, EM_LINELENGTH, char_index, 0);
+	line_length = SendMessage(hText, EM_LINELENGTH, char_index, 0);
+	/*Deal with empty line*/
+	if (line_length <= 0) {
+		return;
+	}
+
 	/*Calculate buffer size required to store the entire line*/
 	buffer_size = (sizeof(TCHAR) * line_length) + (sizeof(TCHAR) * 2);
 	
@@ -88,22 +128,10 @@ static void ProcessTextChange(HWND hText)
 	}
 	buffer[line_length-1]='\n';
 	buffer[line_length] = 0;
-	
-	/*Finally evaluate the expression*/
-	error = EvaluateExpressions((char *)buffer, line_length, 0);
-	if (error == 0) {
-		/*Print the number in user specified format*/
-		PrintResult(hText, *fExpressionResult);
-	} else {
-		char *error_string;
 
-		error_string = GetLastErrorString();
-		AppendText(hText, "\r\n");
-		AppendText(hText, error_string);
-	}
+	EvaluateExpressionAndPrintResult(hText, buffer);
 	
-	/*cleanup*/
-	free(buffer);
+	/*buffer is not freed here, since it will be managed by history*/
 }
 
 LRESULT APIENTRY EditSubclassProc(HWND hwnd, UINT wMessage, WPARAM wParam, LPARAM lParam) 
@@ -112,10 +140,21 @@ LRESULT APIENTRY EditSubclassProc(HWND hwnd, UINT wMessage, WPARAM wParam, LPARA
 	{
 		case WM_GETDLGCODE:
 			return DLGC_WANTALLKEYS;
+		case WM_KEYDOWN:
+			if (wParam == VK_UP) {
+				ReplaceCurrentLine(hwnd, GetExpressionFromPrevLocation());
+				return TRUE;
+			}
+			if (wParam == VK_DOWN) {
+				ReplaceCurrentLine(hwnd, GetExpressionFromNextLocation());
+				return TRUE;
+			}
+			break;
 		case WM_CHAR:
 			if (wParam == VK_RETURN) {
 				ProcessTextChange(hwnd);
 			}
+			break;
 	}
 	return CallWindowProc(wpOrigEditProc, hwnd, wMessage, wParam, lParam); 
 }
@@ -123,7 +162,8 @@ LRESULT APIENTRY EditSubclassProc(HWND hwnd, UINT wMessage, WPARAM wParam, LPARA
 LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg,  WPARAM wParam, LPARAM lParam)
 {
 	static HWND hText;
-	
+	HFONT hFont;
+
     switch(Msg)
     {
 		case WM_CREATE:
@@ -133,6 +173,9 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg,  WPARAM wParam, LPARAM lParam
 			wpOrigEditProc = (WNDPROC)SetWindowLongPtr(hText, GWL_WNDPROC, (LONG_PTR)EditSubclassProc); 
 			ShowWindow(hText, SW_SHOWNORMAL);
 			UpdateWindow(hText);
+			hFont=CreateFont(0, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS, CLIP_DEFAULT_PRECIS, 
+							 ANTIALIASED_QUALITY, VARIABLE_PITCH, TEXT("Lucida Console"));
+			SendMessage(hText, WM_SETFONT, (WPARAM) hFont, MAKELPARAM(TRUE, 0));
 			break;
 		case WM_CTLCOLORSTATIC:
 		case WM_CTLCOLOREDIT:
